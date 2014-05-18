@@ -1,0 +1,9 @@
+{
+  "name": "serial",
+  "version": "0.0.1",
+  "repo": "xythobuz/serial",
+  "description": "Easy serial port usage with optional XON/XOFF flow control",
+  "keywords": ["terminal", "term", "tty", "console", "serial"],
+  "license": "MIT",
+  "src": ["src/serial.c", "src/serial.h"]
+}
