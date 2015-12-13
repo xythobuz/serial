@@ -31,8 +31,10 @@ int serialOpen(const char *port, unsigned int baud) {
     struct termios options;
 
     int fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
-    if (fd == -1)
+    if (fd == -1) {
+        fprintf(stderr, "Couldn't open port \"%s\": %s\n", port, strerror(errno));
         return -1;
+    }
 
     tcgetattr(fd, &options);
 
