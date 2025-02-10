@@ -2,18 +2,18 @@
  * Copyright 2012 - 2014 Thomas Buck <xythobuz@xythobuz.de>
  */
 
+#include "serial.h"
+
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <termios.h>
-#include <dirent.h>
-#include <errno.h>
 #include <time.h>
-#include <poll.h>
-
-#include "serial.h"
+#include <unistd.h>
 
 #ifndef XON
 #define XON 0x11
@@ -56,10 +56,10 @@ int serialOpen(const char *port, unsigned int baud) {
             cfsetispeed(&options, B38400);
             cfsetospeed(&options, B38400);
             break;
-        case 76800:
-            cfsetispeed(&options, B76800);
-            cfsetospeed(&options, B76800);
-            break;
+        // case 76800:
+        //   cfsetispeed(&options, B76800);
+        //  cfsetospeed(&options, B76800);
+        //  break;
         case 115200:
             cfsetispeed(&options, B115200);
             cfsetospeed(&options, B115200);
@@ -71,25 +71,25 @@ int serialOpen(const char *port, unsigned int baud) {
     }
 
     // Input Modes
-    options.c_iflag |= IGNCR; // Ignore CR
+    options.c_iflag |= IGNCR;  // Ignore CR
 #ifdef XONXOFF
-    options.c_iflag |= IXON; // XON-XOFF Flow Control
+    options.c_iflag |= IXON;  // XON-XOFF Flow Control
 #endif
 
     // Output Modes
-    options.c_oflag |= OPOST; // Post-process output
+    options.c_oflag |= OPOST;  // Post-process output
 
     // Control Modes
-    options.c_cflag |= CS8; // 8 data bits
-    options.c_cflag |= CREAD; // Enable Receiver
-    options.c_cflag |= CLOCAL; // Ignore modem status lines
+    options.c_cflag |= CS8;     // 8 data bits
+    options.c_cflag |= CREAD;   // Enable Receiver
+    options.c_cflag |= CLOCAL;  // Ignore modem status lines
 
     // Local Modes
-    options.c_lflag |= IEXTEN; // Extended input character processing
+    options.c_lflag |= IEXTEN;  // Extended input character processing
 
     // Special characters
-    options.c_cc[VMIN] = 0; // Always return...
-    options.c_cc[VTIME] = 0; // ..immediately from read()
+    options.c_cc[VMIN] = 0;   // Always return...
+    options.c_cc[VTIME] = 0;  // ..immediately from read()
 #ifdef XONXOFF
     options.c_cc[VSTOP] = XOFF;
     options.c_cc[VSTART] = XON;
@@ -110,7 +110,7 @@ void serialClose(int fd) {
 int serialHasChar(int fd) {
     struct pollfd fds;
     fds.fd = fd;
-    fds.events = (POLLIN | POLLPRI); // Data may be read
+    fds.events = (POLLIN | POLLPRI);  // Data may be read
     if (poll(&fds, 1, 0) > 0) {
         return 1;
     } else {
@@ -158,9 +158,7 @@ unsigned int serialReadRaw(int fd, char *d, int len) {
     return processed;
 }
 
-void serialWriteChar(int fd, char c) {
-    while (serialWriteRaw(fd, &c, 1) != 1);
-}
+void serialWriteChar(int fd, char c) { while (serialWriteRaw(fd, &c, 1) != 1); }
 
 void serialReadChar(int fd, char *c) {
     while (serialReadRaw(fd, c, 1) != 1);
@@ -180,11 +178,10 @@ void serialReadChar(int fd, char *c) {
 }
 
 void serialWriteString(int fd, const char *s) {
-    while (*s)
-        serialWriteChar(fd, *(s++));
+    while (*s) serialWriteChar(fd, *(s++));
 }
 
-char** getSerialPorts(void) {
+char **getSerialPorts(void) {
     DIR *dir;
     struct dirent *ent;
 
@@ -194,7 +191,7 @@ char** getSerialPorts(void) {
 #ifdef SEARCH
         if (strstr(ent->d_name, SEARCH) != NULL)
 #endif
-        size++;
+            size++;
     }
     closedir(dir);
 
@@ -203,7 +200,6 @@ char** getSerialPorts(void) {
     int i = 0;
     dir = opendir("/dev/");
     while (((ent = readdir(dir)) != NULL) && (i < size)) {
-
 #ifdef SEARCH
         if (strstr(ent->d_name, SEARCH) != NULL) {
 #endif
@@ -231,10 +227,8 @@ char** getSerialPorts(void) {
 #ifdef SEARCH
         }
 #endif
-
     }
     closedir(dir);
     files[i] = NULL;
     return files;
 }
-
